@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AgriGuru - Smart Farming Solutions</title>
+    <meta name="description" content="AI-Powered Agricultural Advisory Platform" />
+    <meta name="author" content="AgriGuru" />
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+        <div class="header-content">
+          <div class="logo-section">
+            <div class="logo-icon">
+              <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+            </div>
+            <div class="logo-text">
+              <h1>AgriGuru</h1>
+              <p>Smart Farming Solutions</p>
+            </div>
+          </div>
+          
+          <div class="header-actions">
+            <button class="btn-primary">Get Started</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+          <div class="hero-content">
+            <h1 class="hero-title">AgriGuru</h1>
+            <p class="hero-subtitle">AI-Powered Agricultural Advisory Platform</p>
+           <p class="hero-description">
+              Get personalized crop advice, real-time weather alerts, market prices, and sustainable farming practices tailored to your land.
+            </p>
+            
+            
+
+          <!-- Quick Stats -->
+           
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-number">12,500+</div>
+              <div class="stat-label">Active Farmers</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">25%</div>
+              <div class="stat-label">Yield Increase</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number">40%</div>
+              <div class="stat-label">Cost Reduction</div>
+            </div>
+            
+          </div>  
+        
+        </section>
+
+        <!-- Dashboard Grid -->
+        <section class="dashboard">
+          <div class="dashboard-grid">
+            <!-- Weather Widget -->
+            <div class="widget weather-widget">
+              <div class="widget-header">
+                <h2>Weather Forecast</h2>
+                <div class="tag">Hyperlocal</div>
+              </div>
+
+              <!-- Weather Search Bar placed here -->
+              <div id="weatherSearch" style="margin-bottom: 1em; display: flex; gap: 0.5em; flex-wrap: wrap;">
+                <input type="text" id="cityInput" placeholder="Enter city name" style="flex:1; padding:0.5em; border-radius:4px; border:1px solid #ccc;">
+                <button id="searchBtn" class="btn-primary">Search</button>
+              </div>
+
+              <!-- Lat/Lon manual input -->
+              <div id="latlonSearch" style="margin-bottom: 1em; display: flex; gap: 0.5em; flex-wrap: wrap;">
+                <input type="number" id="latInput" placeholder="Latitude" step="any" style="flex:1; padding:0.5em; border-radius:4px; border:1px solid #ccc;">
+                <input type="number" id="lonInput" placeholder="Longitude" step="any" style="flex:1; padding:0.5em; border-radius:4px; border:1px solid #ccc;">
+                <button id="latlonBtn" class="btn-primary">Get Weather</button>
+                <button id="detectLocationBtn" class="btn-secondary" title="Detect your location automatically">Detect My Location</button>
+              </div>
+              
+              <div class="current-weather">
+                <div class="weather-info">
+                  <div class="temperature">28°C</div>
+                  <div class="condition">Sunny & Clear</div>
+                  <div class="feels-like">Feels like 31°C</div>
+                  <div class="weather-metrics" style="overflow-x: auto; flex-wrap: nowrap;">
+                    <span id="windMetric">💨 Wind: --</span>
+                    <span id="humidityMetric">💧 Humidity: --</span>
+                    <span id="rainMetric">🌧 Rain: --</span>
+                    <span id="uvMetric">☀ UV Index: --</span>
+                  </div>
+                </div>
+                <div class="weather-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <div class="forecast-grid" id="forecastGrid">
+                <!-- Forecast items will be populated by JavaScript -->
+              </div>
+              
+              <div class="advisory">
+                <div class="advisory-indicator"></div>
+                <span><strong>Advisory:</strong> Ideal conditions for irrigation today</span>
+              </div>
+            </div>
+
+            <!-- Alerts Widget -->
+
+            <!-- Crop Advisory Widget -->
+            <div class="widget crop-widget">
+              <div class="widget-header">
+                <svg class="widget-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                </svg>
+                <h2>Crop Recommendations</h2>
+              </div>
+              
+              <div class="location-info">
+                <div class="location-text">Based on your location: Punjab, India</div>
+                <div class="soil-info">Soil Type: Alluvial • Climate: Semi-arid • Last Yield: Good</div>
+              </div>
+              
+              <div class="recommendations" id="recommendations">
+                <!-- Recommendations will be populated by JavaScript -->
+              </div>
+              
+              <button class="btn-primary full-width">Get Detailed Analysis</button>
+            </div>
+
+            <!-- Market Price Widget -->
+            <div class="widget market-widget">
+              <div class="widget-header">
+                <h2>Market Prices</h2>
+                <div class="live-indicator">Live Updates</div>
+              </div>
+              
+              <div class="price-list" id="priceList">
+                <!-- Price data will be populated by JavaScript -->
+              </div>
+              
+              <button class="btn-secondary full-width">View All Markets</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Feature Cards -->
+        
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

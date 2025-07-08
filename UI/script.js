@@ -1,0 +1,624 @@
+// AgriGuru Vanilla JS Application
+
+class AgriGuruApp {
+  constructor() {
+    this.selectedLanguage = 'en';
+    this.apiKey = '32f240e7dbf987239fa93ae66c6225c3';
+    this.init();
+  }
+
+  init() {
+    this.setupEventListeners();
+    this.loadWeatherData();
+    this.populateAlerts();
+    this.populateCropRecommendations();
+    this.populateMarketPrices();
+    this.populateFeatures();
+    this.setupWeatherSearch(); // <-- Add search setup
+  }
+
+  // --- Add this method ---
+  setupWeatherSearch() {
+    const searchBtn = document.getElementById('searchBtn');
+    const cityInput = document.getElementById('cityInput');
+    if (searchBtn && cityInput) {
+      searchBtn.addEventListener('click', async () => {
+        const city = cityInput.value.trim();
+        if (city) {
+          try {
+            const weatherData = await this.fetchWeatherDataByCity(city);
+            this.populateWeatherData(weatherData);
+          } catch (error) {
+            alert('City not found or API error.');
+          }
+        }
+      });
+      cityInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') searchBtn.click();
+      });
+    }
+
+    // --- Add lat/lon search logic ---
+    const latInput = document.getElementById('latInput');
+    const lonInput = document.getElementById('lonInput');
+    const latlonBtn = document.getElementById('latlonBtn');
+    if (latInput && lonInput && latlonBtn) {
+      latlonBtn.addEventListener('click', async () => {
+        const lat = parseFloat(latInput.value);
+        const lon = parseFloat(lonInput.value);
+        if (!isNaN(lat) && !isNaN(lon)) {
+          try {
+            const weatherData = await this.fetchWeatherData(lat, lon);
+            this.populateWeatherData(weatherData);
+          } catch (error) {
+            alert('Coordinates not found or API error.');
+          }
+        } else {
+          alert('Please enter valid latitude and longitude values.');
+        }
+      });
+      latInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') latlonBtn.click();
+      });
+      lonInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') latlonBtn.click();
+      });
+    }
+
+    const detectLocationBtn = document.getElementById('detectLocationBtn');
+    if (detectLocationBtn && latInput && lonInput) {
+      detectLocationBtn.addEventListener('click', () => {
+        if (navigator.geolocation) {
+          detectLocationBtn.textContent = 'Detecting...';
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              latInput.value = position.coords.latitude.toFixed(5);
+              lonInput.value = position.coords.longitude.toFixed(5);
+              detectLocationBtn.textContent = 'Detect My Location';
+            },
+            (error) => {
+              alert('Unable to detect location.');
+              detectLocationBtn.textContent = 'Detect My Location';
+            }
+          );
+        } else {
+          alert('Geolocation is not supported by your browser.');
+        }
+      });
+    }
+  }
+
+  // --- Add this method ---
+  async fetchWeatherDataByCity(city) {
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
+
+    const [currentResponse, forecastResponse] = await Promise.all([
+      fetch(currentWeatherUrl),
+      fetch(forecastUrl)
+    ]);
+
+    if (!currentResponse.ok || !forecastResponse.ok) {
+      throw new Error('Weather API request failed');
+    }
+
+    const currentWeather = await currentResponse.json();
+    const forecast = await forecastResponse.json();
+
+    return {
+      current: currentWeather,
+      forecast: forecast
+    };
+  }
+
+  async loadWeatherData() {
+    try {
+      // Get user's location or use default coordinates (Delhi, India)
+      const coords = await this.getCurrentLocation();
+      const weatherData = await this.fetchWeatherData(coords.lat, coords.lon);
+      this.populateWeatherData(weatherData);
+    } catch (error) {
+      console.error('Error loading weather data:', error);
+      // Fallback to mock data if API fails
+      this.populateWeatherData(null);
+    }
+  }
+
+  getCurrentLocation() {
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude
+            });
+          },
+          (error) => {
+            console.log('Geolocation error, using default location');
+            // Default to Delhi, India coordinates
+            resolve({ lat: 28.6139, lon: 77.2090 });
+          }
+        );
+      } else {
+        // Default to Delhi, India coordinates
+        resolve({ lat: 28.6139, lon: 77.2090 });
+      }
+    });
+  }
+
+  async fetchWeatherData(lat, lon) {
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`;
+    const uvUrl = `https://api.openweathermap.org/data/2.5/uvi?lat=${lat}&lon=${lon}&appid=${this.apiKey}`;
+
+    const [currentResponse, forecastResponse, uvResponse] = await Promise.all([
+      fetch(currentWeatherUrl),
+      fetch(forecastUrl),
+      fetch(uvUrl)
+    ]);
+
+    if (!currentResponse.ok || !forecastResponse.ok || !uvResponse.ok) {
+      throw new Error('Weather API request failed');
+    }
+
+    const currentWeather = await currentResponse.json();
+    const forecast = await forecastResponse.json();
+    const uvData = await uvResponse.json();
+
+    return {
+      current: currentWeather,
+      forecast: forecast,
+      uvIndex: uvData.value
+    };
+  }
+
+  processForecastData(forecastData) {
+    // 7-day forecast using OpenWeatherMap 3-hour interval data
+    const dailyData = [];
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const todayIdx = new Date().getDay();
+    // Group by day (get first entry for each day)
+    let lastDate = '';
+    let dayCount = 0;
+    for (let i = 0; i < forecastData.list.length && dayCount < 7; i++) {
+      const item = forecastData.list[i];
+      const date = item.dt_txt.split(' ')[0];
+      if (date !== lastDate) {
+        const d = new Date(item.dt * 1000);
+        const dayName = dayCount === 0 ? 'Today' : daysOfWeek[(todayIdx + dayCount) % 7];
+        const temp = Math.round(item.main.temp);
+        const condition = item.weather[0].main;
+        const iconType = this.getIconType(item.weather[0].main);
+        const tooltip = item.weather[0].description;
+        dailyData.push({
+          day: dayName,
+          temp: `${temp}°C`,
+          condition,
+          iconType,
+          tooltip
+        });
+        lastDate = date;
+        dayCount++;
+      }
+    }
+    return dailyData;
+  }
+
+  populateWeatherData(weatherData) {
+    // Update current weather
+    if (weatherData && weatherData.current) {
+      const current = weatherData.current;
+      const temp = Math.round(current.main.temp);
+      const feelsLike = Math.round(current.main.feels_like);
+      const condition = current.weather[0].description;
+      const windSpeed = current.wind ? current.wind.speed : null;
+      const windDeg = current.wind ? current.wind.deg : null;
+      const humidity = current.main.humidity;
+      const rain = (current.rain && (current.rain['1h'] || current.rain['3h'])) ? (current.rain['1h'] || current.rain['3h']) : 0;
+      const uvIndex = weatherData.uvIndex !== undefined ? weatherData.uvIndex : '--';
+
+      // Wind direction helper
+      function degToCompass(num) {
+        const val = Math.floor((num / 22.5) + 0.5);
+        const arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+        return arr[(val % 16)];
+      }
+
+      // Update current weather display
+      const tempElement = document.querySelector('.temperature');
+      const conditionElement = document.querySelector('.condition');
+      const feelsLikeElement = document.querySelector('.feels-like');
+      const windMetric = document.getElementById('windMetric');
+      const humidityMetric = document.getElementById('humidityMetric');
+      const rainMetric = document.getElementById('rainMetric');
+      const uvMetric = document.getElementById('uvMetric');
+
+      if (tempElement) tempElement.textContent = `${temp}°C;`
+      if (conditionElement) conditionElement.textContent = this.capitalizeWords(condition);
+      if (feelsLikeElement) feelsLikeElement.textContent =` Feels like ${feelsLike}°C`;
+      if (windMetric) windMetric.textContent =` 💨 Wind: ${windSpeed !== null ? windSpeed + ' km/h ' + (windDeg !== null ? degToCompass(windDeg) : '') : '--'}`;
+      if (humidityMetric) humidityMetric.textContent = `💧 Humidity: ${humidity !== undefined ? humidity + '%' : '--'}`;
+      if (rainMetric) rainMetric.textContent = `🌧 Rain: ${rain} mm`;
+      if (uvMetric) uvMetric.textContent = `☀ UV Index: ${uvIndex}`;
+    }
+
+    // Contextual advisories
+    const advisoryDiv = document.querySelector('.advisory span');
+    let advice = 'Ideal conditions for irrigation today';
+    if (weatherData && weatherData.current) {
+      const temp = weatherData.current.main.temp;
+      const humidity = weatherData.current.main.humidity;
+      const rain = (weatherData.current.rain && (weatherData.current.rain['1h'] || weatherData.current.rain['3h'])) ? (weatherData.current.rain['1h'] || weatherData.current.rain['3h']) : 0;
+      const uv = weatherData.uvIndex;
+      if (rain > 2) {
+        advice = '🌧 Rain expected — avoid irrigation today';
+      } else if (temp > 35 && humidity < 30) {
+        advice = '☀ Hot & dry week — consider mulching or extra irrigation';
+      } else if (uv >= 8) {
+        advice = '☀ UV Index very high — limit outdoor work during midday';
+      } else if (humidity > 80) {
+        advice = '💧 High humidity — monitor for crop diseases';
+      }
+    }
+    if (advisoryDiv) advisoryDiv.innerHTML = `<strong>Advisory:</strong> ${advice}`;
+
+    // Extended 7-day forecast
+    let forecastData;
+    if (weatherData && weatherData.forecast) {
+      forecastData = this.processForecastData(weatherData.forecast);
+    } else {
+      forecastData = [
+        { day: 'Today', temp: '28°C', condition: 'Sunny', iconType: 'sun', tooltip: 'Sunny' },
+        { day: 'Tue', temp: '25°C', condition: 'Partly Cloudy', iconType: 'cloud', tooltip: 'Partly Cloudy' },
+        { day: 'Wed', temp: '22°C', condition: 'Light Rain', iconType: 'rain', tooltip: 'Light Rain' },
+        { day: 'Thu', temp: '26°C', condition: 'Sunny', iconType: 'sun', tooltip: 'Sunny' },
+        { day: 'Fri', temp: '27°C', condition: 'Sunny', iconType: 'sun', tooltip: 'Sunny' },
+        { day: 'Sat', temp: '29°C', condition: 'Sunny', iconType: 'sun', tooltip: 'Sunny' },
+        { day: 'Sun', temp: '30°C', condition: 'Sunny', iconType: 'sun', tooltip: 'Sunny' }
+      ];
+    }
+    const forecastGrid = document.getElementById('forecastGrid');
+    if (forecastGrid) {
+      forecastGrid.innerHTML = `<div class="forecast-scroll" style="display:flex;overflow-x:auto;gap:0.75em;">${
+        forecastData.map(item => `
+          <div class="forecast-item" title="${item.tooltip}" style="min-width:80px;">
+            <div class="forecast-day">${item.day}</div>
+            <div class="forecast-icon">${this.getWeatherIcon(item.iconType)}</div>
+            <div class="forecast-temp">${item.temp}</div>
+          </div>
+        `).join('')
+      }</div>`;
+    }
+  }
+
+  getIconType(weatherMain) {
+    const iconMap = {
+      'Clear': 'sun',
+      'Clouds': 'cloud',
+      'Rain': 'rain',
+      'Drizzle': 'rain',
+      'Thunderstorm': 'rain',
+      'Snow': 'cloud',
+      'Mist': 'cloud',
+      'Fog': 'cloud'
+    };
+    return iconMap[weatherMain] || 'sun';
+  }
+
+  capitalizeWords(str) {
+    return str.split(' ').map(word =>
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  }
+
+  setupEventListeners() {
+    // Language selector
+    const languageOptions = document.getElementById('languageOptions');
+    if (languageOptions) {
+      languageOptions.addEventListener('click', (e) => {
+        if (e.target.classList.contains('language-btn')) {
+          this.handleLanguageChange(e.target);
+        }
+      });
+    }
+
+    // Feature cards hover effects
+    document.addEventListener('DOMContentLoaded', () => {
+      const featureCards = document.querySelectorAll('.feature-card');
+      featureCards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+          card.style.transform = 'translateY(-4px) scale(1.02)';
+        });
+
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'translateY(0) scale(1)';
+        });
+      });
+    });
+  }
+
+  handleLanguageChange(button) {
+    // Remove active class from all buttons
+    document.querySelectorAll('.language-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // Add active class to clicked button
+    button.classList.add('active');
+
+    // Update selected language
+    this.selectedLanguage = button.dataset.lang;
+
+    // Here you would typically load translations
+    console.log(`Language changed to: ${this.selectedLanguage}`);
+  }
+
+  getWeatherIcon(type) {
+    const icons = {
+      sun: `<svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>`,
+      cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+      </svg>`,
+      rain: `<svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+        <path d="M16 13v8l4-7-4-1z"/>
+        <path d="M8 13v8l4-7-4-1z"/>
+        <path d="M12 13v8l4-7-4-1z"/>
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+      </svg>`
+    };
+    return icons[type] || icons.sun;
+  }
+
+  populateAlerts() {
+    const alertsData = [
+      {
+        type: 'warning',
+        title: 'Drought Alert',
+        message: 'Low rainfall expected for next 7 days',
+        time: '2 hours ago'
+      },
+      {
+        type: 'info',
+        title: 'Market Update',
+        message: 'Wheat prices increased by 5.2% today',
+        time: '4 hours ago'
+      },
+      {
+        type: 'success',
+        title: 'Optimal Conditions',
+        message: 'Perfect weather for cotton harvesting',
+        time: '6 hours ago'
+      }
+    ];
+
+    const alertsList = document.getElementById('alertsList');
+    if (alertsList) {
+      alertsList.innerHTML = alertsData.map(alert => `
+        <div class="alert-item ${alert.type}">
+          <div class="alert-title">${alert.title}</div>
+          <div class="alert-message">${alert.message}</div>
+          <div class="alert-time">${alert.time}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  populateCropRecommendations() {
+    const recommendations = [
+      {
+        crop: 'Tomatoes',
+        suitability: 92,
+        reason: 'Optimal soil pH and moisture levels',
+        season: 'Spring'
+      },
+      {
+        crop: 'Wheat',
+        suitability: 78,
+        reason: 'Good for current soil nutrients',
+        season: 'Winter'
+      },
+      {
+        crop: 'Maize',
+        suitability: 85,
+        reason: 'Excellent weather conditions',
+        season: 'Summer'
+      }
+    ];
+
+    const recommendationsContainer = document.getElementById('recommendations');
+    if (recommendationsContainer) {
+      recommendationsContainer.innerHTML = recommendations.map(rec => `
+        <div class="recommendation-item">
+          <div class="recommendation-info">
+            <div class="crop-name">${rec.crop}</div>
+            <div class="crop-reason">${rec.reason}</div>
+            <div class="season-tag">Best for ${rec.season}</div>
+          </div>
+          <div class="suitability-score">
+            <div class="score-label">Suitability</div>
+            <div class="score-value">${rec.suitability}%</div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${rec.suitability}%"></div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  populateMarketPrices() {
+    const priceData = [
+      { crop: 'Wheat', price: '₹2,150', change: '+5.2%', isUp: true, market: 'Local' },
+      { crop: 'Rice', price: '₹3,200', change: '-2.1%', isUp: false, market: 'Regional' },
+      { crop: 'Maize', price: '₹1,800', change: '+3.8%', isUp: true, market: 'National' },
+      { crop: 'Cotton', price: '₹5,600', change: '+1.5%', isUp: true, market: 'Export' }
+    ];
+
+    const priceList = document.getElementById('priceList');
+    if (priceList) {
+      priceList.innerHTML = priceData.map(item => `
+        <div class="price-item">
+          <div class="crop-info">
+            <div class="crop-name">${item.crop}</div>
+            <div class="market-type">${item.market} Market</div>
+          </div>
+          <div class="price-info">
+            <div class="price-value">${item.price}</div>
+            <div class="price-change ${item.isUp ? 'positive' : 'negative'}">
+              ${this.getArrowIcon(item.isUp)}
+              ${item.change}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  getArrowIcon(isUp) {
+    return isUp
+      ? `<svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m18 15-6-6-6 6"/>
+        </svg>`
+      : `<svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m6 9 6 6 6-6"/>
+        </svg>`;
+  }
+
+  populateFeatures() {
+    const features = [
+      {
+        title: 'Crop Selection Advisor',
+        description: 'Get personalized crop recommendations based on your soil type, climate, and historical yield data.',
+        icon: 'database',
+        gradient: 'linear-gradient(135deg, #22c55e, #10b981)'
+      },
+      {
+        title: 'Weather & Climate',
+        description: 'Hyperlocal weather forecasting with drought and disease alerts tailored to your location.',
+        icon: 'cloud',
+        gradient: 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+      },
+      {
+        title: 'Market Intelligence',
+        description: 'Real-time prices for local and national agricultural markets to maximize your profits.',
+        icon: 'search',
+        gradient: 'linear-gradient(135deg, #f59e0b, #f97316)'
+      },
+      {
+        title: 'Sustainable Practices',
+        description: 'Eco-friendly farming techniques customized for your land to improve long-term productivity.',
+        icon: 'sun',
+        gradient: 'linear-gradient(135deg, #84cc16, #22c55e)'
+      },
+      {
+        title: 'IoT Sensors',
+        description: 'Connect and monitor your field sensors for soil moisture, temperature, and nutrient levels.',
+        icon: 'database',
+        gradient: 'linear-gradient(135deg, #8b5cf6, #ec4899)'
+      },
+      {
+        title: 'Offline Access',
+        description: 'Download essential information and continue using the app even without internet connection.',
+        icon: 'download',
+        gradient: 'linear-gradient(135deg, #6b7280, #64748b)'
+      }
+    ];
+
+    const featuresGrid = document.getElementById('featuresGrid');
+    if (featuresGrid) {
+      featuresGrid.innerHTML = features.map(feature => `
+        <div class="feature-card">
+          <div class="feature-icon" style="background: ${feature.gradient}">
+            ${this.getFeatureIcon(feature.icon)}
+          </div>
+          <h3 class="feature-title">${feature.title}</h3>
+          <p class="feature-description">${feature.description}</p>
+          <div class="learn-more">
+            Learn More
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  getFeatureIcon(type) {
+    const icons = {
+      database: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+      </svg>`,
+      cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+      </svg>`,
+      search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>`,
+      sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>`,
+      download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7,10 12,15 17,10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>`
+    };
+    return icons[type] || icons.database;
+  }
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new AgriGuruApp();
+});
+
+// Add some interactive features
+document.addEventListener('DOMContentLoaded', () => {
+  // Smooth scrolling for any internal links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+
+  // Add click handlers for buttons
+  document.querySelectorAll('.btn-primary, .btn-secondary').forEach(button => {
+    button.addEventListener('click', function(e) {
+      // Add a subtle animation on click
+      this.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        this.style.transform = 'scale(1)';
+      }, 150);
+
+      // Log the action (in a real app, this would trigger actual functionality)
+      console.log(`Button clicked: ${this.textContent.trim()}`);
+    });
+  });
+
+  // Add hover effects for cards
+  document.querySelectorAll('.stat-card, .widget').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px)';
+    });
+
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+    });
+  });
+});
