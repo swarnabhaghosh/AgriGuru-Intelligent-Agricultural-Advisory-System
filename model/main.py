@@ -22,7 +22,7 @@ class CropInput(BaseModel):
 # Define prediction endpoint
 @app.post("/predict")
 def predict_crop(data: CropInput):
-    features = np.array([[data.N, data.P, data.K, data.temperature, data.humidity, data.ph, data.rainfall]])
+    features = np.array([[data.N, data.P, data.K, data.ph, data.temperature, data.humidity, data.rainfall]])
     pred_encoded = model.predict(features)[0]
     crop_name = le.inverse_transform([pred_encoded])[0]
     return {"recommended_crop": crop_name}
