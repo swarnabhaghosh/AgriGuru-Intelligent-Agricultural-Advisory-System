@@ -234,7 +234,7 @@ class AgriGuruApp {
       const rainMetric = document.getElementById('rainMetric');
       const uvMetric = document.getElementById('uvMetric');
 
-      if (tempElement) tempElement.textContent = `${temp}°C;`
+      if (tempElement) tempElement.textContent = `${temp}°C`;
       if (conditionElement) conditionElement.textContent = this.capitalizeWords(condition);
       if (feelsLikeElement) feelsLikeElement.textContent =` Feels like ${feelsLike}°C`;
       if (windMetric) windMetric.textContent =` 💨 Wind: ${windSpeed !== null ? windSpeed + ' km/h ' + (windDeg !== null ? degToCompass(windDeg) : '') : '--'}`;
