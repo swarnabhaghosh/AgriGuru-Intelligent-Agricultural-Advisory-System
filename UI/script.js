@@ -717,3 +717,167 @@ document.getElementById("predict-form").addEventListener("submit", async functio
     document.getElementById("result").textContent = "❌ Error: " + err.message;
   }
 });
+
+// Language translations for key UI elements
+const translations = {
+  en: {
+    'AgriGuru': 'AgriGuru',
+    'Empowering Farmers with AI-Driven Insights': 'Empowering Farmers with AI-Driven Insights',
+    'Real-time Weather & Irrigation Tips': 'Real-time Weather & Irrigation Tips',
+    'Crop Yield Forecasts': 'Crop Yield Forecasts',
+    'Market Price Monitoring': 'Market Price Monitoring',
+    'Personalized Crop Advisory': 'Personalized Crop Advisory',
+    'Get Started': 'Get Started',
+    'Smart Farming Solutions': 'Smart Farming Solutions',
+    'Weather Forecast': 'Weather Forecast',
+    'Hyperlocal': 'Hyperlocal',
+    'Search': 'Search',
+    'Get Weather': 'Get Weather',
+    'Detect My Location': 'Detect My Location',
+    'Crop Recommendations': 'Crop Recommendations',
+    'Based on your location: Punjab, India': 'Based on your location: Punjab, India',
+    'Soil Type: Alluvial • Climate: Semi-arid • Last Yield: Good': 'Soil Type: Alluvial • Climate: Semi-arid • Last Yield: Good',
+    'Get Detailed Analysis': 'Get Detailed Analysis',
+    'Market Prices': 'Market Prices',
+    'Live Updates': 'Live Updates',
+    'Enter State': 'Enter State',
+    'Enter District': 'Enter District',
+    'Get Market Prices': 'Get Market Prices',
+    'View All Markets': 'View All Markets',
+    'N': 'N', 'P': 'P', 'K': 'K', 'pH': 'pH', 'Temperature': 'Temperature', 'Humidity': 'Humidity', 'Rainfall': 'Rainfall',
+    'Get Recommendation': 'Get Recommendation',
+    'Recommended Crop:': 'Recommended Crop:',
+    'Error:': 'Error:',
+    'AI-Powered Agricultural Advisory Platform': 'AI-Powered Agricultural Advisory Platform',
+    'Ideal conditions for irrigation today': 'Ideal conditions for irrigation today',
+    'Active Farmers': 'Active Farmers',
+    'Yield Increase': 'Yield Increase',
+    'Cost Reduction': 'Cost Reduction',
+  },
+  hi: {
+    'AgriGuru': 'एग्रीगुरु',
+    'Empowering Farmers with AI-Driven Insights': 'किसानों को एआई-संचालित सलाह के साथ सशक्त बनाना',
+    'Real-time Weather & Irrigation Tips': 'रीयल-टाइम मौसम और सिंचाई सुझाव',
+    'Crop Yield Forecasts': 'फसल उपज पूर्वानुमान',
+    'Market Price Monitoring': 'बाजार मूल्य निगरानी',
+    'Personalized Crop Advisory': 'व्यक्तिगत फसल सलाह',
+    'Get Started': 'शुरू करें',
+    'Smart Farming Solutions': 'स्मार्ट खेती समाधान',
+    'Weather Forecast': 'मौसम पूर्वानुमान',
+    'Hyperlocal': 'हाइपरलोकल',
+    'Search': 'खोजें',
+    'Get Weather': 'मौसम प्राप्त करें',
+    'Detect My Location': 'मेरा स्थान पता करें',
+    'Crop Recommendations': 'फसल सिफारिशें',
+    'Based on your location: Punjab, India': 'आपके स्थान के आधार पर: पंजाब, भारत',
+    'Soil Type: Alluvial • Climate: Semi-arid • Last Yield: Good': 'मिट्टी: जलोढ़ • जलवायु: अर्ध-शुष्क • पिछली उपज: अच्छी',
+    'Get Detailed Analysis': 'विस्तृत विश्लेषण प्राप्त करें',
+    'Market Prices': 'बाजार मूल्य',
+    'Live Updates': 'लाइव अपडेट',
+    'Enter State': 'राज्य दर्ज करें',
+    'Enter District': 'जिला दर्ज करें',
+    'Get Market Prices': 'बाजार मूल्य प्राप्त करें',
+    'View All Markets': 'सभी बाजार देखें',
+    'N': 'एन', 'P': 'पी', 'K': 'के', 'pH': 'पीएच', 'Temperature': 'तापमान', 'Humidity': 'आर्द्रता', 'Rainfall': 'वर्षा',
+    'Get Recommendation': 'सिफारिश प्राप्त करें',
+    'Recommended Crop:': 'अनुशंसित फसल:',
+    'Error:': 'त्रुटि:',
+    'AI-Powered Agricultural Advisory Platform': 'एआई-संचालित कृषि सलाह मंच',
+    'Ideal conditions for irrigation today': 'आज सिंचाई के लिए आदर्श स्थिति',
+    'Active Farmers': 'सक्रिय किसान',
+    'Yield Increase': 'उपज वृद्धि',
+    'Cost Reduction': 'लागत में कमी',
+  },
+  bn: {
+    'AgriGuru': 'এগ্রিগুরু',
+    'Empowering Farmers with AI-Driven Insights': 'কৃষকদের এআই-চালিত পরামর্শে ক্ষমতায়ন',
+    'Real-time Weather & Irrigation Tips': 'রিয়েল-টাইম আবহাওয়া ও সেচ পরামর্শ',
+    'Crop Yield Forecasts': 'ফসল উৎপাদন পূর্বাভাস',
+    'Market Price Monitoring': 'বাজার মূল্য পর্যবেক্ষণ',
+    'Personalized Crop Advisory': 'ব্যক্তিগত ফসল পরামর্শ',
+    'Get Started': 'শুরু করুন',
+    'Smart Farming Solutions': 'স্মার্ট কৃষি সমাধান',
+    'Weather Forecast': 'আবহাওয়ার পূর্বাভাস',
+    'Hyperlocal': 'হাইপারলোকাল',
+    'Search': 'অনুসন্ধান',
+    'Get Weather': 'আবহাওয়া পান',
+    'Detect My Location': 'আমার অবস্থান নির্ধারণ করুন',
+    'Crop Recommendations': 'ফসলের সুপারিশ',
+    'Based on your location: Punjab, India': 'আপনার অবস্থান: পাঞ্জাব, ভারত',
+    'Soil Type: Alluvial • Climate: Semi-arid • Last Yield: Good': 'মাটি: এলুভিয়াল • জলবায়ু: আধা-শুষ্ক • শেষ ফলন: ভাল',
+    'Get Detailed Analysis': 'বিস্তারিত বিশ্লেষণ পান',
+    'Market Prices': 'বাজার মূল্য',
+    'Live Updates': 'লাইভ আপডেট',
+    'Enter State': 'রাজ্য লিখুন',
+    'Enter District': 'জেলা লিখুন',
+    'Get Market Prices': 'বাজার মূল্য পান',
+    'View All Markets': 'সব বাজার দেখুন',
+    'N': 'এন', 'P': 'পি', 'K': 'কে', 'pH': 'পি-এইচ', 'Temperature': 'তাপমাত্রা', 'Humidity': 'আর্দ্রতা', 'Rainfall': 'বৃষ্টিপাত',
+    'Get Recommendation': 'সুপারিশ পান',
+    'Recommended Crop:': 'সুপারিশকৃত ফসল:',
+    'Error:': 'ত্রুটি:',
+    'AI-Powered Agricultural Advisory Platform': 'এআই-চালিত কৃষি পরামর্শ প্ল্যাটফর্ম',
+    'Ideal conditions for irrigation today': 'আজ সেচের জন্য আদর্শ অবস্থা',
+    'Active Farmers': 'সক্রিয় কৃষক',
+    'Yield Increase': 'উৎপাদন বৃদ্ধি',
+    'Cost Reduction': 'খরচ হ্রাস',
+  }
+};
+
+function translatePage(lang) {
+  // Translate static text elements by their textContent
+  const allElements = document.querySelectorAll('body *:not(script):not(style)');
+  allElements.forEach(el => {
+    if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3) {
+      const original = el.textContent.trim();
+      for (const key in translations.en) {
+        if (original === translations.en[key] || original === translations.hi[key] || original === translations.bn[key]) {
+          el.textContent = translations[lang][key];
+        }
+      }
+    }
+  });
+  // Translate placeholders
+  document.getElementById('cityInput').placeholder = translations[lang]['Enter city name'] || 'Enter city name';
+  document.getElementById('stateInput').placeholder = translations[lang]['Enter State'] || 'Enter State';
+  document.getElementById('districtInput').placeholder = translations[lang]['Enter District'] || 'Enter District';
+  document.getElementById('N').placeholder = translations[lang]['N'] || 'N';
+  document.getElementById('P').placeholder = translations[lang]['P'] || 'P';
+  document.getElementById('K').placeholder = translations[lang]['K'] || 'K';
+  document.getElementById('ph').placeholder = translations[lang]['pH'] || 'pH';
+  document.getElementById('temperature').placeholder = translations[lang]['Temperature'] || 'Temperature';
+  document.getElementById('humidity').placeholder = translations[lang]['Humidity'] || 'Humidity';
+  document.getElementById('rainfall').placeholder = translations[lang]['Rainfall'] || 'Rainfall';
+}
+
+// Language dropdown logic
+const languageSelector = document.getElementById('languageSelector');
+const languageBtn = document.getElementById('languageBtn');
+const languageDropdown = document.getElementById('languageDropdown');
+const currentLanguage = document.getElementById('currentLanguage');
+
+let selectedLang = 'en';
+languageBtn.addEventListener('click', function(e) {
+  e.stopPropagation();
+  languageSelector.classList.toggle('open');
+  languageBtn.setAttribute('aria-expanded', languageSelector.classList.contains('open'));
+});
+
+document.querySelectorAll('.language-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    selectedLang = this.getAttribute('data-lang');
+    currentLanguage.textContent = this.textContent;
+    languageSelector.classList.remove('open');
+    translatePage(selectedLang);
+  });
+});
+
+document.addEventListener('click', function(e) {
+  if (!languageSelector.contains(e.target)) {
+    languageSelector.classList.remove('open');
+    languageBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+
+// On page load, set default language
+translatePage(selectedLang);
