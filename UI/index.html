@@ -143,8 +143,9 @@
             </div>
 
             <div class="advisory">
-              <strong>Advisory:</strong> Ideal conditions for irrigation today
-            </div>
+  <strong></strong> <span id="advisoryText">Ideal conditions for irrigation today</span>
+</div>
+
           </div>
 
           <!-- Crop Advisory Widget -->
@@ -181,6 +182,18 @@
         </div>
       </section>
     </div>
+    <form id="predict-form">
+  <input id="N" type="number" placeholder="N" required />
+  <input id="P" type="number" placeholder="P" required />
+  <input id="K" type="number" placeholder="K" required />
+  <input id="ph" type="number" step="0.1" placeholder="pH" required />
+  <input id="temperature" type="number" step="0.1" placeholder="Temperature" required />
+  <input id="humidity" type="number" step="0.1" placeholder="Humidity" required />
+  <input id="rainfall" type="number" step="0.1" placeholder="Rainfall" required />
+  <button type="submit">Get Recommendation</button>
+</form>
+
+<p id="result"></p>
   </main>
 
   <!-- ✅ Script -->

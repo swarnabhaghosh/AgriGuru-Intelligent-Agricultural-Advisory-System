@@ -89,27 +89,42 @@ class AgriGuruApp {
   }
 
   // --- Add this method ---
-  async fetchWeatherDataByCity(city) {
-    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
+  // --- Updated Method: fetchWeatherDataByCity with UV Index support ---
+async fetchWeatherDataByCity(city) {
+  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
+  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
 
-    const [currentResponse, forecastResponse] = await Promise.all([
-      fetch(currentWeatherUrl),
-      fetch(forecastUrl)
-    ]);
+  const [currentResponse, forecastResponse] = await Promise.all([
+    fetch(currentWeatherUrl),
+    fetch(forecastUrl)
+  ]);
 
-    if (!currentResponse.ok || !forecastResponse.ok) {
-      throw new Error('Weather API request failed');
-    }
-
-    const currentWeather = await currentResponse.json();
-    const forecast = await forecastResponse.json();
-
-    return {
-      current: currentWeather,
-      forecast: forecast
-    };
+  if (!currentResponse.ok || !forecastResponse.ok) {
+    throw new Error('Weather API request failed');
   }
+
+  const currentWeather = await currentResponse.json();
+  const forecast = await forecastResponse.json();
+
+  const lat = currentWeather.coord.lat;
+  const lon = currentWeather.coord.lon;
+  const uvUrl = `https://api.openweathermap.org/data/2.5/uvi?lat=${lat}&lon=${lon}&appid=${this.apiKey}`;
+
+  const uvResponse = await fetch(uvUrl);
+  if (!uvResponse.ok) {
+    throw new Error('UV Index API request failed');
+  }
+
+  const uvData = await uvResponse.json();
+
+  return {
+    current: currentWeather,
+    forecast: forecast,
+    uvIndex: uvData.value
+  };
+}
+
+
 
   async loadWeatherData() {
     try {
@@ -244,24 +259,37 @@ class AgriGuruApp {
     }
 
     // Contextual advisories
-    const advisoryDiv = document.querySelector('.advisory span');
-    let advice = 'Ideal conditions for irrigation today';
-    if (weatherData && weatherData.current) {
-      const temp = weatherData.current.main.temp;
-      const humidity = weatherData.current.main.humidity;
-      const rain = (weatherData.current.rain && (weatherData.current.rain['1h'] || weatherData.current.rain['3h'])) ? (weatherData.current.rain['1h'] || weatherData.current.rain['3h']) : 0;
-      const uv = weatherData.uvIndex;
-      if (rain > 2) {
-        advice = '🌧 Rain expected — avoid irrigation today';
-      } else if (temp > 35 && humidity < 30) {
-        advice = '☀ Hot & dry week — consider mulching or extra irrigation';
-      } else if (uv >= 8) {
-        advice = '☀ UV Index very high — limit outdoor work during midday';
-      } else if (humidity > 80) {
-        advice = '💧 High humidity — monitor for crop diseases';
-      }
-    }
-    if (advisoryDiv) advisoryDiv.innerHTML = `<strong>Advisory:</strong> ${advice}`;
+    // Contextual advisories
+const advisoryDiv = document.querySelector('.advisory span');
+let advice = 'Ideal conditions for irrigation today';
+
+if (weatherData && weatherData.current && weatherData.current.main) {
+  const temp = weatherData.current.main.temp;
+  const humidity = weatherData.current.main.humidity;
+  const rain = (weatherData.current.rain && (weatherData.current.rain['1h'] || weatherData.current.rain['3h']))
+    ? (weatherData.current.rain['1h'] || weatherData.current.rain['3h'])
+    : 0;
+  const uv = weatherData.uvIndex !== undefined ? weatherData.uvIndex : 0;
+
+  console.log("👉 Temp:", temp, "| Humidity:", humidity, "| Rain:", rain, "| UV:", uv); // DEBUG LOG
+
+  if (rain > 2) {
+    advice = '🌧 Rain expected — avoid irrigation today';
+  } else if (temp > 35 && humidity < 30) {
+    advice = '☀ Hot & dry week — consider mulching or extra irrigation';
+  } else if (uv >= 8) {
+    advice = '☀ UV Index very high — limit outdoor work during midday';
+  } else if (humidity > 80) {
+    advice = '💧 High humidity — monitor for crop diseases';
+  }
+}
+
+if (advisoryDiv) {
+  advisoryDiv.innerHTML = `<strong>Advisory:</strong> ${advice}`;
+} else {
+  console.warn("❌ Advisory div not found in DOM!");
+}
+
 
     // Extended 7-day forecast
     let forecastData;
@@ -634,4 +662,32 @@ document.getElementById('startBtn').addEventListener('click', function () {
     intro.style.display = 'none';
     mainContent.style.display = 'block';
   }, 1000); // matches CSS transition time
+});
+document.getElementById("predict-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const data = {
+    N: parseFloat(document.getElementById("N").value),
+    P: parseFloat(document.getElementById("P").value),
+    K: parseFloat(document.getElementById("K").value),
+    ph: parseFloat(document.getElementById("ph").value),
+    temperature: parseFloat(document.getElementById("temperature").value),
+    humidity: parseFloat(document.getElementById("humidity").value),
+    rainfall: parseFloat(document.getElementById("rainfall").value)
+  };
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    document.getElementById("result").textContent = "🌱 Recommended Crop: " + result.recommended_crop;
+  } catch (err) {
+    document.getElementById("result").textContent = "❌ Error: " + err.message;
+  }
 });
