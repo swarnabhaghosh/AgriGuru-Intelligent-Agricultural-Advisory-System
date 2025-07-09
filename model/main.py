@@ -38,13 +38,13 @@ app.add_middleware(
 
 # Input schema with field validation
 class CropInput(BaseModel):
-    N: float = Field(..., gt=0, description="Nitrogen level (ppm)", example=90)
-    P: float = Field(..., gt=0, description="Phosphorus level (ppm)", example=42)
-    K: float = Field(..., gt=0, description="Potassium level (ppm)", example=43)
-    ph: float = Field(..., ge=0, le=14, description="Soil pH (0-14)", example=6.5)
-    temperature: float = Field(..., description="Temperature in °C", example=24)
-    humidity: float = Field(..., ge=0, le=100, description="Humidity in %", example=80)
-    rainfall: float = Field(..., ge=0, description="Rainfall in mm", example=120)
+    N: float = Field(..., ge=0, le=140, description="Nitrogen level (ppm)", example=90)
+    P: float = Field(..., ge=5, le=145, description="Phosphorus level (ppm)", example=42)
+    K: float = Field(..., ge=5, le=205, description="Potassium level (ppm)", example=43)
+    ph: float = Field(..., ge=3.5, le=9.0, description="Soil pH (3.5-9.0)", example=6.5)
+    temperature: float = Field(..., ge=8, le=45, description="Temperature in °C", example=24)
+    humidity: float = Field(..., ge=10, le=100, description="Humidity in %", example=80)
+    rainfall: float = Field(..., ge=20, le=300, description="Rainfall in mm", example=120)
 
 # Output schema
 class CropRecommendation(BaseModel):
