@@ -174,11 +174,20 @@
               <h2>Market Prices</h2>
               <div class="live-indicator">Live Updates</div>
             </div>
+
+            <!-- 🔽 Add this section for inputs -->
+            <div id="market-section" style="margin-bottom: 1em; display: flex; flex-wrap: wrap; gap: 0.5em;">
+              <input type="text" id="stateInput" placeholder="Enter State" style="flex:1; padding: 0.5em;" />
+              <input type="text" id="districtInput" placeholder="Enter District" style="flex:1; padding: 0.5em;" />
+              <button id="fetchMarketBtn" class="btn-primary">📈 Get Market Prices</button>
+            </div>
+
             <div class="price-list" id="priceList">
               <!-- Populated via JS -->
             </div>
             <button class="btn-secondary full-width">View All Markets</button>
           </div>
+
         </div>
       </section>
     </div>

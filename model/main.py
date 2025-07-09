@@ -6,6 +6,7 @@ import joblib
 import pandas as pd
 import logging
 from typing import List
+import requests
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
@@ -104,6 +105,43 @@ def get_available_crops():
     except Exception as e:
         logger.error(f"Failed to get available crops: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to get available crops")
+
+# Market Price Insight Endpoint (Live from Agmarknet API)
+@app.get("/market_prices")
+def get_market_prices(state: str, district: str):
+    try:
+        API_KEY = "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b"
+        RESOURCE_ID = "9ef84268-d588-465a-a308-a864a43d0070"  # Example Agmarknet resource
+
+        url = (
+            f"https://api.data.gov.in/resource/{RESOURCE_ID}"
+            f"?api-key={API_KEY}&format=json"
+            f"&filters[state]={state}&filters[district]={district}"
+        )
+
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise HTTPException(status_code=502, detail="Failed to fetch from Agmarknet API")
+
+        data = response.json()
+        records = data.get("records", [])
+        if not records:
+            raise HTTPException(status_code=404, detail="No market data found for given location")
+
+        prices = [
+            {
+                "crop": item.get("commodity"),
+                "market": item.get("market"),
+                "price": f"{round(float(item.get('modal_price')) / 100, 2)} ₹/kg"
+            }
+            for item in records if item.get("commodity") and item.get("modal_price")
+        ]
+
+        return {"prices": prices[:5]}  # Return top 5
+
+    except Exception as e:
+        logger.error(f"Market price retrieval failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch market prices: {str(e)}")
 
 # For running directly (optional, use uvicorn command instead)
 if __name__ == "__main__":

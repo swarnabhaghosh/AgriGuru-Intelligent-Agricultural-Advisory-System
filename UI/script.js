@@ -90,17 +90,17 @@ class AgriGuruApp {
 
   // --- Add this method ---
   // --- Updated Method: fetchWeatherDataByCity with UV Index support ---
-async fetchWeatherDataByCity(city) {
-  const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
-  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
+  async fetchWeatherDataByCity(city) {
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${this.apiKey}&units=metric`;
 
-  const [currentResponse, forecastResponse] = await Promise.all([
-    fetch(currentWeatherUrl),
-    fetch(forecastUrl)
-  ]);
+    const [currentResponse, forecastResponse] = await Promise.all([
+      fetch(currentWeatherUrl),
+      fetch(forecastUrl)
+    ]);
 
-  if (!currentResponse.ok || !forecastResponse.ok) {
-    throw new Error('Weather API request failed');
+    if (!currentResponse.ok || !forecastResponse.ok) {
+      throw new Error('Weather API request failed');
   }
 
   const currentWeather = await currentResponse.json();
@@ -479,32 +479,58 @@ if (advisoryDiv) {
   }
 
   populateMarketPrices() {
-    const priceData = [
-      { crop: 'Wheat', price: '₹2,150', change: '+5.2%', isUp: true, market: 'Local' },
-      { crop: 'Rice', price: '₹3,200', change: '-2.1%', isUp: false, market: 'Regional' },
-      { crop: 'Maize', price: '₹1,800', change: '+3.8%', isUp: true, market: 'National' },
-      { crop: 'Cotton', price: '₹5,600', change: '+1.5%', isUp: true, market: 'Export' }
-    ];
+    const stateInput = document.getElementById("stateInput");
+    const districtInput = document.getElementById("districtInput");
+    const fetchBtn = document.getElementById("fetchMarketBtn");
 
-    const priceList = document.getElementById('priceList');
-    if (priceList) {
-      priceList.innerHTML = priceData.map(item => `
-        <div class="price-item">
-          <div class="crop-info">
-            <div class="crop-name">${item.crop}</div>
-            <div class="market-type">${item.market} Market</div>
-          </div>
-          <div class="price-info">
-            <div class="price-value">${item.price}</div>
-            <div class="price-change ${item.isUp ? 'positive' : 'negative'}">
-              ${this.getArrowIcon(item.isUp)}
-              ${item.change}
-            </div>
-          </div>
-        </div>
-      `).join('');
+    if (stateInput && districtInput && fetchBtn) {
+      fetchBtn.addEventListener("click", () => {
+        const state = stateInput.value.trim();
+        const district = districtInput.value.trim();
+        if (state && district) {
+          this.fetchMarketPrices(state, district);
+        } else {
+          alert("Please enter both state and district");
+        }
+      });
     }
   }
+
+
+  async fetchMarketPrices(state, district) {
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/market_prices?state=${encodeURIComponent(state)}&district=${encodeURIComponent(district)}`);
+      if (!res.ok) {
+        throw new Error("Market data not available for this location");
+      }
+      const data = await res.json();
+      this.renderMarketPrices(data.prices);
+    } catch (err) {
+      console.error("Market price fetch error:", err.message);
+      const priceList = document.getElementById("priceList");
+      if (priceList) {
+        priceList.innerHTML = `<div class="price-item error">❌ ${err.message}</div>`;
+      }
+    }
+  }
+
+  renderMarketPrices(prices) {
+    const priceList = document.getElementById("priceList");
+    if (!priceList) return;
+
+    priceList.innerHTML = prices.map(item => `
+      <div class="price-item">
+        <div class="crop-info">
+          <div class="crop-name">${item.crop}</div>
+          <div class="market-type">${item.market}</div>
+        </div>
+        <div class="price-info">
+          <div class="price-value">₹${item.price}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
 
   getArrowIcon(isUp) {
     return isUp
