@@ -619,15 +619,24 @@ body {
 }
 
 /* Weather Metrics */
-.weather-metrics {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  
-  padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: #22c55e transparent;
+.weather-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  gap: 0.5em;
+  margin-top: 0.5em;
+  padding: 0.5em;
+  background-color: #f5fdfc;
+  border-radius: 8px;
 }
+
+.weather-metrics-grid span {
+  background-color: #e2f4ec;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  text-align: center;
+}
+
 
 .weather-metrics::-webkit-scrollbar {
   height: 2px; /* Slim scrollbar height */
@@ -907,4 +916,113 @@ body {
 .arrow-icon {
   width: 0.85rem;
   height: 0.85rem;
+}
+/* Intro Page Styles */
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5, #bbf7d0);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 1s ease;
+}
+
+.intro-overlay {
+  position: absolute;
+  inset: 0;
+  background: url('https://www.transparenttextures.com/patterns/green-cup.png'); /* Farm field style pattern */
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.intro-content {
+  z-index: 1;
+  text-align: center;
+  padding: 2rem;
+  animation: fadeInUp 1s ease forwards;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.intro-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #166534;
+  margin-bottom: 1rem;
+  animation: zoomIn 1s ease-in-out;
+}
+
+.intro-subtitle {
+  font-size: 1.25rem;
+  color: #4ade80;
+  margin-bottom: 2rem;
+}
+
+.intro-highlights {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 2rem;
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+.intro-highlights li {
+  font-size: 1rem;
+  color: #166534;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.intro-btn {
+  font-size: 1rem;
+  padding: 0.75rem 2rem;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .intro-title {
+    font-size: 2rem;
+  }
+
+  .intro-subtitle {
+    font-size: 1rem;
+  }
+
+  .intro-highlights li {
+    font-size: 0.9rem;
+  }
 }

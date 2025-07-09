@@ -622,3 +622,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+document.getElementById('startBtn').addEventListener('click', function () {
+  const intro = document.getElementById('intro');
+  const mainContent = document.getElementById('mainContent');
+
+  // Add fade-out effect
+  intro.classList.add('fade-out');
+
+  // Wait for fade-out to finish, then show main content
+  setTimeout(() => {
+    intro.style.display = 'none';
+    mainContent.style.display = 'block';
+  }, 1000); // matches CSS transition time
+});
