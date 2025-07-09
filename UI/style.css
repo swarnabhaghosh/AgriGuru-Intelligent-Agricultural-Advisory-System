@@ -401,6 +401,12 @@ body {
   color: #1f2937;
   margin-top: 0.25rem;
 }
+#predict-form{
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* margin-bottom: 1rem; */
+}
 
 @media (max-width: 900px) {
   .forecast-scroll {

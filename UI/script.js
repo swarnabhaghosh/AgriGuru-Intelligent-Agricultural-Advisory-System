@@ -717,3 +717,33 @@ document.getElementById("predict-form").addEventListener("submit", async functio
     document.getElementById("result").textContent = "❌ Error: " + err.message;
   }
 });
+const toggleFormBtn = document.getElementById('toggleFormBtn');
+const recommendations = document.getElementById('recommendations');
+const formContainer = document.getElementById('analysisFormContainer');
+
+if (toggleFormBtn && recommendations && formContainer) {
+  toggleFormBtn.addEventListener('click', () => {
+    const isVisible = formContainer.style.display === 'block';
+
+    if (isVisible) {
+      formContainer.style.display = 'none';
+      recommendations.style.display = 'block';
+      toggleFormBtn.textContent = 'Get Detailed Analysis';
+    } else {
+      formContainer.style.display = 'block';
+      recommendations.style.display = 'none';
+      toggleFormBtn.textContent = 'Hide Analysis';
+    }
+  });
+}
+const sliderIds = ["N", "P", "K", "ph", "temperature", "humidity", "rainfall"];
+sliderIds.forEach(id => {
+  const slider = document.getElementById(id);
+  const valueSpan = document.getElementById(`${id}-value`);
+  if (slider && valueSpan) {
+    slider.addEventListener("input", () => {
+      valueSpan.textContent = slider.value;
+    });
+  }
+});
+
