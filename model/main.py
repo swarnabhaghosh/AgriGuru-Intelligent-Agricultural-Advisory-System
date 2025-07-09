@@ -111,7 +111,7 @@ def get_available_crops():
 def get_market_prices(state: str, district: str):
     try:
         API_KEY = "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b"
-        RESOURCE_ID = "9ef84268-d588-465a-a308-a864a43d0070"  # Example Agmarknet resource
+        RESOURCE_ID = "9ef84268-d588-465a-a308-a864a43d0070"
 
         url = (
             f"https://api.data.gov.in/resource/{RESOURCE_ID}"
@@ -128,16 +128,30 @@ def get_market_prices(state: str, district: str):
         if not records:
             raise HTTPException(status_code=404, detail="No market data found for given location")
 
-        prices = [
-            {
-                "crop": item.get("commodity"),
-                "market": item.get("market"),
-                "price": f"{round(float(item.get('modal_price')) / 100, 2)} /kg"
-            }
-            for item in records if item.get("commodity") and item.get("modal_price")
-        ]
+        # Filter unique crops and keep highest priced ones
+        seen = set()
+        prices = []
+        for item in records:
+            crop = item.get("commodity")
+            modal_price = item.get("modal_price")
+            if crop and crop not in seen and modal_price:
+                seen.add(crop)
+                price_value = float(modal_price) / 100  # Convert to ₹/kg
+                prices.append({
+                    "crop": crop,
+                    "market": item.get("market"),
+                    "price_value": price_value,
+                    "price": f"{round(price_value, 2)} /kg"
+                })
 
-        return {"prices": prices[:5]}  # Return top 5
+        # Sort by price descending
+        prices.sort(key=lambda x: x["price_value"], reverse=True)
+
+        # Remove price_value before returning
+        for item in prices:
+            item.pop("price_value")
+
+        return {"prices": prices[:5]}  # Return top 5 unique crops
 
     except Exception as e:
         logger.error(f"Market price retrieval failed: {str(e)}")
