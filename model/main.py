@@ -110,7 +110,7 @@ def get_available_crops():
 @app.get("/market_prices")
 def get_market_prices(state: str, district: str):
     try:
-        API_KEY = "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b"
+        API_KEY = "579b464db66ec23bdd000001fec89dfd4afe49005d84dd44e3214147"
         RESOURCE_ID = "9ef84268-d588-465a-a308-a864a43d0070"  # Example Agmarknet resource
 
         url = (
@@ -132,7 +132,7 @@ def get_market_prices(state: str, district: str):
             {
                 "crop": item.get("commodity"),
                 "market": item.get("market"),
-                "price": f"{round(float(item.get('modal_price')) / 100, 2)} ₹/kg"
+                "price": f"{round(float(item.get('modal_price')) / 100, 2)} /kg"
             }
             for item in records if item.get("commodity") and item.get("modal_price")
         ]
