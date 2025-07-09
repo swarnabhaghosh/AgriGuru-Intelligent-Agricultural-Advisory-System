@@ -129,29 +129,31 @@ def get_market_prices(state: str, district: str):
             raise HTTPException(status_code=404, detail="No market data found for given location")
 
         # Filter unique crops and keep highest priced ones
-        seen = set()
-        prices = []
+        crop_price_map = {}
         for item in records:
             crop = item.get("commodity")
             modal_price = item.get("modal_price")
-            if crop and crop not in seen and modal_price:
-                seen.add(crop)
-                price_value = float(modal_price) / 100  # Convert to ₹/kg
-                prices.append({
-                    "crop": crop,
-                    "market": item.get("market"),
-                    "price_value": price_value,
-                    "price": f"{round(price_value, 2)} /kg"
-                })
+            market = item.get("market")
+            if crop and modal_price and market:
+                price = float(modal_price) / 100
+                if crop not in crop_price_map or price > crop_price_map[crop]["price_value"]:
+                    crop_price_map[crop] = {
+                        "crop": crop,
+                        "market": market,
+                        "price_value": price,
+                        "price": f"{round(price, 2)} /kg"
+                    }
 
-        # Sort by price descending
+        # Convert to list
+        prices = list(crop_price_map.values())
         prices.sort(key=lambda x: x["price_value"], reverse=True)
 
-        # Remove price_value before returning
+        # Clean up and return top 5
         for item in prices:
             item.pop("price_value")
 
-        return {"prices": prices[:5]}  # Return top 5 unique crops
+        return {"prices": prices[:5]}
+
 
     except Exception as e:
         logger.error(f"Market price retrieval failed: {str(e)}")
