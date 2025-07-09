@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
 import joblib
 
@@ -8,6 +9,19 @@ model = joblib.load("crop_model.pkl")
 le = joblib.load("label_encoder.pkl")
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or ["http://127.0.0.1:5500"] if you use Live Server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+def read_root():
+    return {"message": "✅ AgriGuru backend is running."}
 
 # Define input schema
 class CropInput(BaseModel):
