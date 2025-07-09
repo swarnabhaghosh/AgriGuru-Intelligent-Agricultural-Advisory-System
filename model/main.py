@@ -28,9 +28,10 @@ class CropInput(BaseModel):
     N: float
     P: float
     K: float
+    ph: float
     temperature: float
     humidity: float
-    ph: float
+    
     rainfall: float
 
 # Define prediction endpoint
