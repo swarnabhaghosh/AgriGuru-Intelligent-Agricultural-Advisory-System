@@ -59,7 +59,21 @@
           </div>
         </div>
         <div class="header-actions">
-          <button class="btn-primary">Get Started</button>
+          <div class="language-selector" id="languageSelector">
+            <button class="language-planet-btn" id="languageDropdownBtn" aria-label="Select Language" style="display:flex;align-items:center;gap:0.2em;">
+              <span class="language-label" style="font-size:2rem;line-height:1;display:flex;align-items:center;">🌐</span>
+              <span class="dropdown-arrow" id="dropdownArrow" style="display:inline-flex;align-items:center;margin-left:4px;transition:transform 0.3s;">
+                <svg width="22" height="22" viewBox="0 0 20 20" fill="none" stroke="#388e3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 8 10 12 14 8"/>
+                </svg>
+              </span>
+            </button>
+            <div class="language-dropdown" id="languageDropdown">
+              <button class="language-btn active" data-lang="en">EN</button>
+              <button class="language-btn" data-lang="hi">हिंदी</button>
+              <button class="language-btn" data-lang="bn">বাংলা</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
