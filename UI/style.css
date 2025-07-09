@@ -178,8 +178,7 @@ body {
   padding: 0.5rem;
   border-radius: 9999px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
+  margin-left: 1rem;
 }
 
 .language-planet-btn {
@@ -199,7 +198,7 @@ body {
 }
 
 .language-label {
-  font-size: 2rem;
+  font-size: 1rem;
   color: #388e3c;
   margin-right: 0.1em;
   display: flex;
@@ -240,25 +239,15 @@ body {
   border: none;
   width: 100%;
   text-align: left;
-  padding: 0.7em 1.2em;
+  padding: 0.5em 1em;
   font-size: 1rem;
-  color: #388e3c;
+  color: #166534;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s;
 }
 
-.language-btn.active, .language-btn:hover {
-  background: #e8f5e9;
-  color: #1b5e20;
-}
-
-@media (max-width: 600px) {
-  .language-label {
-    font-size: 1.5rem;
-  }
-  .language-dropdown {
-    min-width: 90px;
-  }
+.language-btn:hover {
+  background: #f0fdf4;
 }
 
 /* Stats Grid */
